@@ -15,3 +15,9 @@ xdg-shell-protocol.o
 .idea/
 *.swp
 *~
+
+# Development files
+.devenv/
+
+# Nix
+result/

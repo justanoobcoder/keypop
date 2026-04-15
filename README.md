@@ -1,5 +1,5 @@
 # Keypop (Wayland)
-A simple key display application for Wayland compositors like Hyprland.
+A simple key display application for Wayland compositors.
 
 ![b1](./public/b1.png)
 
@@ -10,23 +10,32 @@ A simple key display application for Wayland compositors like Hyprland.
 - Optimized for low memory usage
 
 ## Install
-```bash
-## https://aur.archlinux.org/packages/keypop-git
-yay -S keypop-git
+
+### Nix
+Add keypop to your `inputs` in `flake.nix`:
+
+```nix
+inputs = {
+  nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+  keypop = {
+    url = "github:justanoobcoder/keypop";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+};
 ```
 
-## Hyprland Configuration
-Add to `~/.config/hypr/hyprland.conf`:
-```conf
-# Keypop - always on top, no effects
-windowrulev2 = float, class:^(keypop)$
-windowrulev2 = pin, class:^(keypop)$
-windowrulev2 = noblur, class:^(keypop)$
-windowrulev2 = noshadow, class:^(keypop)$
-windowrulev2 = noborder, class:^(keypop)$
-windowrulev2 = nofocus, class:^(keypop)$
-windowrulev2 = move 100%-820 100%-100, class:^(keypop)$
-windowrulev2 = nodim, class:^(keypop)$
+Install keypop:
+```nix
+{
+  pkgs,
+  inputs,
+  ...
+}:{
+  home.packages = with pkgs; [
+    inputs.keypop.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ];
+}
 ```
 
 ## Build

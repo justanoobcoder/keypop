@@ -6,5 +6,6 @@
 void buf_append(struct client_state *state, const char *text);
 void buf_backspace(struct client_state *state);
 void buf_delete_word(struct client_state *state);
+void buf_pop_last_seg(struct client_state *state);
 
 #endif

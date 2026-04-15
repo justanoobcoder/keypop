@@ -41,3 +41,26 @@ void hide_window(struct client_state *state) {
     wl_surface_attach(state->surface, NULL, 0, 0);
     wl_surface_commit(state->surface);
 }
+
+void show_window(struct client_state *state) {
+    if (state->window_visible) return;
+
+    if (state->xdg_toplevel) {
+        xdg_toplevel_destroy(state->xdg_toplevel);
+        state->xdg_toplevel = NULL;
+    }
+    if (state->xdg_surface) {
+        xdg_surface_destroy(state->xdg_surface);
+        state->xdg_surface = NULL;
+    }
+    if (state->surface) {
+        wl_surface_destroy(state->surface);
+        state->surface = NULL;
+    }
+
+    window_create(state);
+    wl_display_roundtrip(state->display);
+
+    state->window_visible = 1;
+    redraw(state);
+}
