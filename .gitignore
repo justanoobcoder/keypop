@@ -18,3 +18,6 @@ xdg-shell-protocol.o
 
 # Development files
 .devenv/
+
+# Nix
+result/
