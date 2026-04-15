@@ -179,9 +179,23 @@ static void draw_icon(cairo_t *cr, const char *key_name, double x, double y,
         double box_w = size * 0.45;
         double box_h = size * 0.35;
 
+        // Draw box
         cairo_set_line_width(cr, size * 0.05);
         cairo_rectangle(cr, cx - box_w / 2, cy - box_h / 2, box_w, box_h);
         cairo_stroke(cr);
+
+        // Get F number
+        const char *f_number = key_name + 1;
+
+        // Draw F number
+        cairo_set_font_size(cr, size * 0.25);
+        cairo_text_extents_t f_ext;
+        cairo_text_extents(cr, f_number, &f_ext);
+
+        cairo_move_to(cr, cx - f_ext.width / 2 - f_ext.x_bearing,
+                      cy - f_ext.height / 2 - f_ext.y_bearing);
+        cairo_show_text(cr, f_number);
+
         cairo_restore(cr);
         return;
 
