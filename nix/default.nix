@@ -12,7 +12,7 @@
   gtk3,
   libappindicator-gtk3,
 }:
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   name = "keypop";
   version = "2.0";
 
@@ -34,14 +34,18 @@ stdenv.mkDerivation {
     libappindicator-gtk3
   ];
 
-  buildPhase = ''
-    make
-  '';
-
   patchPhase = ''
     substituteInPlace Makefile \
       --replace /usr/share/wayland-protocols \
                 ${wayland-protocols}/share/wayland-protocols
+  '';
+
+  preBuild = ''
+    export GIT_COMMIT="${src.rev or "unknown"}"
+  '';
+
+  buildPhase = ''
+    make
   '';
 
   installPhase = ''
