@@ -4,6 +4,7 @@
 *.o
 keypop
 build/
+src/version.h
 
 # Generated Wayland protocol files
 xdg-shell-protocol.c
