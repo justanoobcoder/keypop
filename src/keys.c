@@ -1,3 +1,4 @@
+#include <xkbcommon/xkbcommon.h>
 #define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <string.h>
@@ -22,6 +23,7 @@ static const char* get_key_symbol(xkb_keysym_t keysym) {
         case XKB_KEY_Alt_L: case XKB_KEY_Alt_R:        return "Alt";
         case XKB_KEY_Super_L: case XKB_KEY_Super_R:      return "Super";
         case XKB_KEY_Shift_L: case XKB_KEY_Shift_R:      return "Shift";
+        case XKB_KEY_BackSpace:    return "BackSpace";
         case XKB_KEY_Delete:       return "Del";
         case XKB_KEY_Home:         return "Home";
         case XKB_KEY_End:          return "End";
@@ -71,13 +73,7 @@ static void process_key_action(struct client_state *state, uint32_t key) {
         show_window(state);
         clock_gettime(CLOCK_MONOTONIC, &state->last_key_time);
 
-        if (keysym == XKB_KEY_BackSpace) {
-            if (state->ctrl_pressed) {
-                buf_delete_word(state);
-            } else {
-                buf_backspace(state);
-            }
-        } else if (state->ctrl_pressed && keysym == XKB_KEY_w) {
+        if (state->ctrl_pressed && keysym == XKB_KEY_w) {
             buf_delete_word(state);
         } else if (!is_mod) {
             char combined_buf[64] = {0};
