@@ -160,25 +160,30 @@ static void draw_icon(cairo_t *cr, const char *key_name, double x, double y, dou
         cairo_stroke(cr);
     
     } else if (strcmp(key_name, "Backspace") == 0 || strcmp(key_name, "BackSpace") == 0) {
-        // Backspace: ⌫ (arrow with X)
-        double cx = x + size * 0.5;
+        // Backspace: ⌫
+        double cx = x + size * 0.55;
         double cy = y - size * 0.3;
-        double w = size * 0.25;
-        
-        // Arrow pointing left
-        cairo_move_to(cr, cx + w, cy);
-        cairo_line_to(cr, cx - w, cy);
-        cairo_move_to(cr, cx - w + size*0.12, cy - size*0.12);
-        cairo_line_to(cr, cx - w, cy);
-        cairo_line_to(cr, cx - w + size*0.12, cy + size*0.12);
-        
-        // Small X on the right
-        cairo_move_to(cr, cx + w - size*0.1, cy - size*0.08);
-        cairo_line_to(cr, cx + w, cy + size*0.08);
-        cairo_move_to(cr, cx + w, cy - size*0.08);
-        cairo_line_to(cr, cx + w - size*0.1, cy + size*0.08);
+        double w = size * 0.35;  // half-width of box
+        double h = size * 0.22;  // half-height of box
+        double tip = size * 0.18; // depth of left arrow tip
+
+        // Pentagon outline
+        cairo_move_to(cr, cx - w, cy);              // left tip
+        cairo_line_to(cr, cx - w + tip, cy - h);    // top-left
+        cairo_line_to(cr, cx + w, cy - h);          // top-right
+        cairo_line_to(cr, cx + w, cy + h);          // bottom-right
+        cairo_line_to(cr, cx - w + tip, cy + h);    // bottom-left
+        cairo_close_path(cr);
         cairo_stroke(cr);
-        
+
+        // X inside
+        double xc = cx + size * 0.1; // center of X, shifted right
+        double xs = h * 0.55;        // size of X arms
+        cairo_move_to(cr, xc - xs, cy - xs);
+        cairo_line_to(cr, xc + xs, cy + xs);
+        cairo_move_to(cr, xc + xs, cy - xs);
+        cairo_line_to(cr, xc - xs, cy + xs);
+        cairo_stroke(cr);
     } else if (strcmp(key_name, "Del") == 0 || strcmp(key_name, "Delete") == 0) {
         // Delete: forward arrow with X
         double cx = x + size * 0.5;
