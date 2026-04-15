@@ -28,10 +28,10 @@ src/version.h: VERSION
 
 # Generate protocol code
 xdg-shell-protocol.c:
-	wayland-scanner private-code /nix/store/lj7cvr4npgvsy8klcga2k85jm2qkvzmy-wayland-protocols-1.47/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml $@
+	wayland-scanner private-code /usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml $@
 
 xdg-shell-client-protocol.h:
-	wayland-scanner client-header /nix/store/lj7cvr4npgvsy8klcga2k85jm2qkvzmy-wayland-protocols-1.47/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml $@
+	wayland-scanner client-header /usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml $@
 
 # Dependencies
 src/main.o: src/main.c src/state.h src/wl_setup.h src/window.h src/keys.h src/draw.h src/tray.h xdg-shell-client-protocol.h src/version.h
