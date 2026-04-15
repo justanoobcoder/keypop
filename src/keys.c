@@ -1,51 +1,100 @@
-#include <xkbcommon/xkbcommon.h>
 #define _POSIX_C_SOURCE 200809L
+#include "buffer.h"
+#include "keys.h"
+#include "window.h"
+#include <libinput.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <libinput.h>
-#include "keys.h"
-#include "buffer.h"
-#include "window.h"
 
-static const char* get_key_symbol(xkb_keysym_t keysym) {
+static const char *get_key_symbol(xkb_keysym_t keysym) {
     switch (keysym) {
-        case XKB_KEY_Return:
-        case XKB_KEY_KP_Enter:     return "Enter";
-        case XKB_KEY_Tab:
-        case XKB_KEY_ISO_Left_Tab: return "Tab";
-        case XKB_KEY_Escape:       return "Esc";
-        case XKB_KEY_Up:           return "Up";
-        case XKB_KEY_Down:         return "Down";
-        case XKB_KEY_Left:         return "Left";
-        case XKB_KEY_Right:        return "Right";
-        case XKB_KEY_Control_L: case XKB_KEY_Control_R: return "Ctrl";
-        case XKB_KEY_Alt_L: case XKB_KEY_Alt_R:        return "Alt";
-        case XKB_KEY_Super_L: case XKB_KEY_Super_R:      return "Super";
-        case XKB_KEY_Shift_L: case XKB_KEY_Shift_R:      return "Shift";
-        case XKB_KEY_BackSpace:    return "BackSpace";
-        case XKB_KEY_Delete:       return "Del";
-        case XKB_KEY_Home:         return "Home";
-        case XKB_KEY_End:          return "End";
-        case XKB_KEY_Prior:        return "PgUp";
-        case XKB_KEY_Next:         return "PgDn";
-        case XKB_KEY_Caps_Lock:    return "Caps";
-        case XKB_KEY_Num_Lock:     return "Num";
-        case XKB_KEY_F1: return "F1"; case XKB_KEY_F2: return "F2";
-        case XKB_KEY_F3: return "F3"; case XKB_KEY_F4: return "F4";
-        case XKB_KEY_F5: return "F5"; case XKB_KEY_F6: return "F6";
-        case XKB_KEY_F7: return "F7"; case XKB_KEY_F8: return "F8";
-        case XKB_KEY_F9: return "F9"; case XKB_KEY_F10: return "F10";
-        case XKB_KEY_F11: return "F11"; case XKB_KEY_F12: return "F12";
-        case XKB_KEY_XF86AudioLowerVolume: return "Vol-";
-        case XKB_KEY_XF86AudioRaiseVolume: return "Vol+";
-        case XKB_KEY_XF86AudioMute:        return "Mute";
-        case XKB_KEY_XF86MonBrightnessUp:  return "Bri+";
-        case XKB_KEY_XF86MonBrightnessDown:return "Bri-";
-        case XKB_KEY_XF86AudioPlay:        return "Play";
-        case XKB_KEY_XF86AudioPrev:        return "Prev";
-        case XKB_KEY_XF86AudioNext:        return "Next";
-        default: return NULL;
+    case XKB_KEY_Return:
+    case XKB_KEY_KP_Enter:
+        return "Enter";
+    case XKB_KEY_Tab:
+    case XKB_KEY_ISO_Left_Tab:
+        return "Tab";
+    case XKB_KEY_Escape:
+        return "Esc";
+    case XKB_KEY_Up:
+        return "Up";
+    case XKB_KEY_Down:
+        return "Down";
+    case XKB_KEY_Left:
+        return "Left";
+    case XKB_KEY_Right:
+        return "Right";
+    case XKB_KEY_Control_L:
+    case XKB_KEY_Control_R:
+        return "Ctrl";
+    case XKB_KEY_Alt_L:
+    case XKB_KEY_Alt_R:
+        return "Alt";
+    case XKB_KEY_Super_L:
+    case XKB_KEY_Super_R:
+        return "Super";
+    case XKB_KEY_Shift_L:
+    case XKB_KEY_Shift_R:
+        return "Shift";
+    case XKB_KEY_BackSpace:
+        return "Backspace";
+    case XKB_KEY_Delete:
+        return "Del";
+    case XKB_KEY_Home:
+        return "Home";
+    case XKB_KEY_End:
+        return "End";
+    case XKB_KEY_Prior:
+        return "PgUp";
+    case XKB_KEY_Next:
+        return "PgDn";
+    case XKB_KEY_Caps_Lock:
+        return "Caps";
+    case XKB_KEY_Num_Lock:
+        return "Num";
+    case XKB_KEY_F1:
+        return "F1";
+    case XKB_KEY_F2:
+        return "F2";
+    case XKB_KEY_F3:
+        return "F3";
+    case XKB_KEY_F4:
+        return "F4";
+    case XKB_KEY_F5:
+        return "F5";
+    case XKB_KEY_F6:
+        return "F6";
+    case XKB_KEY_F7:
+        return "F7";
+    case XKB_KEY_F8:
+        return "F8";
+    case XKB_KEY_F9:
+        return "F9";
+    case XKB_KEY_F10:
+        return "F10";
+    case XKB_KEY_F11:
+        return "F11";
+    case XKB_KEY_F12:
+        return "F12";
+    case XKB_KEY_XF86AudioLowerVolume:
+        return "Vol-";
+    case XKB_KEY_XF86AudioRaiseVolume:
+        return "Vol+";
+    case XKB_KEY_XF86AudioMute:
+        return "Mute";
+    case XKB_KEY_XF86MonBrightnessUp:
+        return "Bri+";
+    case XKB_KEY_XF86MonBrightnessDown:
+        return "Bri-";
+    case XKB_KEY_XF86AudioPlay:
+        return "Play";
+    case XKB_KEY_XF86AudioPrev:
+        return "Prev";
+    case XKB_KEY_XF86AudioNext:
+        return "Next";
+    default:
+        return NULL;
     }
 }
 
@@ -56,77 +105,84 @@ static int is_modifier(xkb_keysym_t key) {
             key == XKB_KEY_Shift_L || key == XKB_KEY_Shift_R);
 }
 
-
-
 static void process_key_action(struct client_state *state, uint32_t key) {
     uint32_t xkb_keycode = key + 8;
     xkb_state_update_key(state->xkb_state, xkb_keycode, XKB_KEY_DOWN);
-    xkb_keysym_t keysym = xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
-    
+    xkb_keysym_t keysym =
+        xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
+
     int is_mod = is_modifier(keysym);
-    if (keysym == XKB_KEY_Control_L || keysym == XKB_KEY_Control_R) state->ctrl_pressed = 1;
-    if (keysym == XKB_KEY_Alt_L || keysym == XKB_KEY_Alt_R) state->alt_pressed = 1;
-    if (keysym == XKB_KEY_Shift_L || keysym == XKB_KEY_Shift_R) state->shift_pressed = 1;
-    if (keysym == XKB_KEY_Super_L || keysym == XKB_KEY_Super_R) state->super_pressed = 1;
+    if (keysym == XKB_KEY_Control_L || keysym == XKB_KEY_Control_R)
+        state->ctrl_pressed = 1;
+    if (keysym == XKB_KEY_Alt_L || keysym == XKB_KEY_Alt_R)
+        state->alt_pressed = 1;
+    if (keysym == XKB_KEY_Shift_L || keysym == XKB_KEY_Shift_R)
+        state->shift_pressed = 1;
+    if (keysym == XKB_KEY_Super_L || keysym == XKB_KEY_Super_R)
+        state->super_pressed = 1;
 
     if (state->overlay_enabled) {
         show_window(state);
         clock_gettime(CLOCK_MONOTONIC, &state->last_key_time);
 
-        if (state->ctrl_pressed && keysym == XKB_KEY_w) {
+        if (keysym == XKB_KEY_BackSpace) {
+            // Reset repeat count tracking since buffer content changes
+            state->last_key[0] = '\0';
+            state->last_key_count = 0;
+            if (state->ctrl_pressed) {
+                buf_delete_word(state);
+            } else {
+                buf_append(state, " \xe2\x8c\xab"); // ⌫ as UTF-8
+            }
+        } else if (state->ctrl_pressed && keysym == XKB_KEY_w) {
+            state->last_key[0] = '\0';
+            state->last_key_count = 0;
             buf_delete_word(state);
         } else if (!is_mod) {
             char combined_buf[64] = {0};
-            if (state->ctrl_pressed) strcat(combined_buf, "Ctrl+");
-            if (state->alt_pressed) strcat(combined_buf, "Alt+");
-            if (state->super_pressed) strcat(combined_buf, "Super+");
-            
+            if (state->ctrl_pressed)
+                strcat(combined_buf, "Ctrl+");
+            if (state->alt_pressed)
+                strcat(combined_buf, "Alt+");
+            if (state->super_pressed)
+                strcat(combined_buf, "Super+");
+
             const char *sym = get_key_symbol(keysym);
             char key_str[32] = {0};
-            
-            // First check if we have a named symbol
+
             if (sym) {
                 strcpy(key_str, sym);
-            } 
-            // Special case for space (render as space character)
-            else if (keysym == XKB_KEY_space) {
+            } else if (keysym == XKB_KEY_space) {
                 strcpy(key_str, " ");
-            }
-            // Try to get printable ASCII characters
-            else if (keysym >= 0x20 && keysym <= 0x7E) {
+            } else if (keysym >= 0x20 && keysym <= 0x7E) {
                 snprintf(key_str, sizeof(key_str), "%c", (char)keysym);
-            }
-            // For other keys, try UTF-8 conversion
-            else {
-                xkb_state_key_get_utf8(state->xkb_state, xkb_keycode, key_str, sizeof(key_str));
-                // If UTF-8 failed or returned control character, try keysym as char if in range
+            } else {
+                xkb_state_key_get_utf8(state->xkb_state, xkb_keycode, key_str,
+                                       sizeof(key_str));
                 if (strlen(key_str) == 0 || (unsigned char)key_str[0] < 32) {
                     if (keysym < 256 && keysym >= 32) {
                         snprintf(key_str, sizeof(key_str), "%c", (char)keysym);
-                    }
-                    // Otherwise just ignore this key (don't display anything)
-                    else {
+                    } else {
                         key_str[0] = '\0';
                     }
                 }
             }
-            
+
             strcat(combined_buf, key_str);
+
             if (strlen(combined_buf) > 0) {
-                // Combo highlighting: Detect important shortcuts and set colors
-                state->use_combo_color = 0; // Reset
-                
-                // Important shortcuts (Green #52C41A)
-                if (state->ctrl_pressed && !state->alt_pressed && !state->super_pressed) {
-                    if (keysym == XKB_KEY_c || keysym == XKB_KEY_v || 
+                // Combo color logic
+                state->use_combo_color = 0;
+                if (state->ctrl_pressed && !state->alt_pressed &&
+                    !state->super_pressed) {
+                    if (keysym == XKB_KEY_c || keysym == XKB_KEY_v ||
                         keysym == XKB_KEY_x || keysym == XKB_KEY_z) {
-                        state->current_combo_color[0] = 0.32; // R
-                        state->current_combo_color[1] = 0.77; // G
-                        state->current_combo_color[2] = 0.10; // B
-                        state->current_combo_color[3] = 1.0;  // A
+                        state->current_combo_color[0] = 0.32;
+                        state->current_combo_color[1] = 0.77;
+                        state->current_combo_color[2] = 0.10;
+                        state->current_combo_color[3] = 1.0;
                         state->use_combo_color = 1;
                     } else {
-                        // Regular Ctrl combos (Blue #5DADE2)
                         state->current_combo_color[0] = 0.36;
                         state->current_combo_color[1] = 0.68;
                         state->current_combo_color[2] = 0.89;
@@ -134,29 +190,56 @@ static void process_key_action(struct client_state *state, uint32_t key) {
                         state->use_combo_color = 1;
                     }
                 } else if (state->alt_pressed && !state->ctrl_pressed) {
-                    // Alt combos (Purple #AF7AC5)
                     state->current_combo_color[0] = 0.69;
                     state->current_combo_color[1] = 0.48;
                     state->current_combo_color[2] = 0.77;
                     state->current_combo_color[3] = 1.0;
                     state->use_combo_color = 1;
                 } else if (state->super_pressed) {
-                    // Super combos (Orange #F39C12)
                     state->current_combo_color[0] = 0.95;
                     state->current_combo_color[1] = 0.61;
                     state->current_combo_color[2] = 0.07;
                     state->current_combo_color[3] = 1.0;
                     state->use_combo_color = 1;
                 }
-                
-                if (state->seg_count > 0) {
-                    int last_len = state->seg_lengths[state->seg_count - 1];
-                    int this_len = strlen(combined_buf);
-                    int prev_is_special = (last_len > 1 && state->display_buf[state->display_len - 1] != ' ');
-                    int this_is_special = (this_len > 1 && combined_buf[0] != ' ');
-                    if (prev_is_special || this_is_special) buf_append(state, " ");
+
+                // --- Key repeat count logic ---
+                if (strcmp(combined_buf, state->last_key) == 0) {
+                    // Same key again: increment count, pop last segment,
+                    // re-append with count
+                    state->last_key_count++;
+                    buf_pop_last_seg(state);
+
+                    // Also pop the preceding space separator if it was added
+                    // (only when count goes from 1→2, the space was added
+                    // before the first append) We don't pop the space; it
+                    // stays. The new segment replaces only the key seg.
+
+                    char counted_buf[128];
+                    // Use × (UTF-8: 0xC3 0x97) as multiplier symbol
+                    snprintf(counted_buf, sizeof(counted_buf), "%s\xc3\x97%d",
+                             combined_buf, state->last_key_count);
+                    buf_append(state, counted_buf);
+                } else {
+                    // New key: add space separator if needed, then append fresh
+                    state->last_key_count = 1;
+                    strncpy(state->last_key, combined_buf,
+                            sizeof(state->last_key) - 1);
+                    state->last_key[sizeof(state->last_key) - 1] = '\0';
+
+                    if (state->seg_count > 0) {
+                        int last_len = state->seg_lengths[state->seg_count - 1];
+                        int this_len = strlen(combined_buf);
+                        int prev_is_special =
+                            (last_len > 1 &&
+                             state->display_buf[state->display_len - 1] != ' ');
+                        int this_is_special =
+                            (this_len > 1 && combined_buf[0] != ' ');
+                        if (prev_is_special || this_is_special)
+                            buf_append(state, " ");
+                    }
+                    buf_append(state, combined_buf);
                 }
-                buf_append(state, combined_buf);
             }
         }
         state->needs_redraw = 1;
@@ -167,61 +250,63 @@ static void process_key_action(struct client_state *state, uint32_t key) {
 static gboolean repeat_rate_tick(gpointer data) {
     struct client_state *state = data;
     process_key_action(state, state->repeat_key);
-    return TRUE; // Continue repeating
+    return TRUE;
 }
 
 // Timer for initial delay
 static gboolean repeat_delay_done(gpointer data) {
     struct client_state *state = data;
-    // Execute once
     process_key_action(state, state->repeat_key);
-    
-    // Switch to rate timer
     if (state->repeat_rate > 0) {
-        state->repeat_timer_id = g_timeout_add(1000 / state->repeat_rate, repeat_rate_tick, state);
+        state->repeat_timer_id =
+            g_timeout_add(1000 / state->repeat_rate, repeat_rate_tick, state);
     } else {
         state->repeat_timer_id = 0;
     }
-    return FALSE; // Stop the delay timer
+    return FALSE;
 }
 
 void handle_key(void *data, uint32_t key, uint32_t state_val) {
     struct client_state *state = data;
     uint32_t xkb_keycode = key + 8;
 
-    // Check if it's a modifier key
-    // We need to peek at the keysym before updating state in process_key_action
-    // Note: This relies on the current state mapping.
-    xkb_keysym_t raw_sym = xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
+    xkb_keysym_t raw_sym =
+        xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
     int is_mod_key = is_modifier(raw_sym);
 
     if (state_val == LIBINPUT_KEY_STATE_PRESSED) {
-        // Guard: If it's a modifier and we think it's already pressed, ignore this repeat.
-        // This handles case where libinput sends repeats OR we messed up logic.
         if (is_mod_key) {
-             if ((raw_sym == XKB_KEY_Shift_L || raw_sym == XKB_KEY_Shift_R) && state->shift_pressed) return;
-             if ((raw_sym == XKB_KEY_Control_L || raw_sym == XKB_KEY_Control_R) && state->ctrl_pressed) return;
-             if ((raw_sym == XKB_KEY_Alt_L || raw_sym == XKB_KEY_Alt_R) && state->alt_pressed) return;
-             if ((raw_sym == XKB_KEY_Super_L || raw_sym == XKB_KEY_Super_R) && state->super_pressed) return;
+            if ((raw_sym == XKB_KEY_Shift_L || raw_sym == XKB_KEY_Shift_R) &&
+                state->shift_pressed)
+                return;
+            if ((raw_sym == XKB_KEY_Control_L ||
+                 raw_sym == XKB_KEY_Control_R) &&
+                state->ctrl_pressed)
+                return;
+            if ((raw_sym == XKB_KEY_Alt_L || raw_sym == XKB_KEY_Alt_R) &&
+                state->alt_pressed)
+                return;
+            if ((raw_sym == XKB_KEY_Super_L || raw_sym == XKB_KEY_Super_R) &&
+                state->super_pressed)
+                return;
         }
 
-        // Cancel existing timer if any
         if (state->repeat_timer_id) {
             g_source_remove(state->repeat_timer_id);
             state->repeat_timer_id = 0;
         }
 
-        // Process the key immediately
         process_key_action(state, key);
-        
-        // Setup repeat if enabled (but NOT for modifiers)
-        // process_key_action already updated xkb_state, so we can just query the keysym
-        xkb_keysym_t keysym = xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
-        if (!is_modifier(keysym) && state->repeat_rate > 0 && state->repeat_delay > 0) {
+
+        xkb_keysym_t keysym =
+            xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
+        if (!is_modifier(keysym) && state->repeat_rate > 0 &&
+            state->repeat_delay > 0) {
             state->repeat_key = key;
-            state->repeat_timer_id = g_timeout_add(state->repeat_delay, repeat_delay_done, state);
+            state->repeat_timer_id =
+                g_timeout_add(state->repeat_delay, repeat_delay_done, state);
         }
-        
+
     } else {
         // Key Release
         if (state->repeat_key == key) {
@@ -233,10 +318,18 @@ void handle_key(void *data, uint32_t key, uint32_t state_val) {
         }
 
         xkb_state_update_key(state->xkb_state, xkb_keycode, XKB_KEY_UP);
-        xkb_keysym_t keysym = xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
-        if (keysym == XKB_KEY_Control_L || keysym == XKB_KEY_Control_R) state->ctrl_pressed = 0;
-        if (keysym == XKB_KEY_Alt_L || keysym == XKB_KEY_Alt_R) state->alt_pressed = 0;
-        if (keysym == XKB_KEY_Shift_L || keysym == XKB_KEY_Shift_R) state->shift_pressed = 0;
-        if (keysym == XKB_KEY_Super_L || keysym == XKB_KEY_Super_R) state->super_pressed = 0;
+        xkb_keysym_t keysym =
+            xkb_state_key_get_one_sym(state->xkb_state, xkb_keycode);
+        if (keysym == XKB_KEY_Control_L || keysym == XKB_KEY_Control_R)
+            state->ctrl_pressed = 0;
+        if (keysym == XKB_KEY_Alt_L || keysym == XKB_KEY_Alt_R)
+            state->alt_pressed = 0;
+        if (keysym == XKB_KEY_Shift_L || keysym == XKB_KEY_Shift_R)
+            state->shift_pressed = 0;
+        if (keysym == XKB_KEY_Super_L || keysym == XKB_KEY_Super_R)
+            state->super_pressed = 0;
+
+        state->last_key[0] = '\0';
+        state->last_key_count = 0;
     }
 }

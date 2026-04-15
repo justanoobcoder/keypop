@@ -1,12 +1,12 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include <time.h>
+#include "input.h"
+#include "xdg-shell-client-protocol.h"
 #include <glib.h>
+#include <time.h>
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
-#include "xdg-shell-client-protocol.h"
-#include "input.h"
 
 #define DEFAULT_WIDTH 840
 #define DEFAULT_HEIGHT 130
@@ -34,13 +34,13 @@ struct client_state {
     struct xdg_surface *xdg_surface;
     struct xdg_toplevel *xdg_toplevel;
     struct wl_buffer *buffer;
-    
+
     // Input
     struct input_state *input;
     struct xkb_context *xkb_ctx;
     struct xkb_keymap *xkb_map;
     struct xkb_state *xkb_state;
-    
+
     // Key Repeat State
     int32_t repeat_rate;   // chars per second
     int32_t repeat_delay;  // ms
@@ -50,19 +50,19 @@ struct client_state {
     // Display state
     char display_buf[MAX_DISPLAY_LEN];
     size_t display_len;
-    
+
     // Segment tracking for atomic backspace
     int seg_lengths[MAX_SEGMENTS];
     int seg_count;
-    
+
     struct timespec last_key_time;
-    
+
     // Flags
     unsigned int running : 1;
     unsigned int window_visible : 1;
     unsigned int needs_redraw : 1;
-    unsigned int overlay_enabled : 1;  // Controls whether app shows when typing
-    
+    unsigned int overlay_enabled : 1; // Controls whether app shows when typing
+
     // Modifiers state
     unsigned int ctrl_pressed : 1;
     unsigned int alt_pressed : 1;
@@ -70,16 +70,20 @@ struct client_state {
     unsigned int super_pressed : 1;
 
     // Configuration
-    double bg_color[4];  // r, g, b, a
+    double bg_color[4];   // r, g, b, a
     double text_color[4]; // r, g, b, a
     int font_size;
     int width;
     int height;
 
     // Combo highlighting
-    double current_combo_color[4]; // Color for current combo (if special)
+    double current_combo_color[4];    // Color for current combo (if special)
     unsigned int use_combo_color : 1; // Whether to use combo color
-    
+
+    // Key repeat count display (e.g. "j×5")
+    char last_key[64];  // last key string that was appended
+    int last_key_count; // how many times it has been repeated
+
     // Mouse state
     struct {
         unsigned int lmb : 1;
@@ -93,5 +97,4 @@ struct client_state {
     // GLib Main Loop
     GMainLoop *loop;
 };
-
 #endif
