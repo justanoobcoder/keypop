@@ -37,6 +37,8 @@ static const char *get_key_symbol(xkb_keysym_t keysym) {
     case XKB_KEY_Shift_L:
     case XKB_KEY_Shift_R:
         return "Shift";
+    case XKB_KEY_space:
+        return "Space";
     case XKB_KEY_BackSpace:
         return "Backspace";
     case XKB_KEY_Delete:
@@ -152,8 +154,6 @@ static void process_key_action(struct client_state *state, uint32_t key) {
 
             if (sym) {
                 strcpy(key_str, sym);
-            } else if (keysym == XKB_KEY_space) {
-                strcpy(key_str, " ");
             } else if (keysym >= 0x20 && keysym <= 0x7E) {
                 snprintf(key_str, sizeof(key_str), "%c", (char)keysym);
             } else {

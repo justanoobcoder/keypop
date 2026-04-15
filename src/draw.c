@@ -117,25 +117,35 @@ static void draw_icon(cairo_t *cr, const char *key_name, double x, double y,
         cairo_line_to(cr, cx + w - size * 0.15, cy + size * 0.15);
         cairo_stroke(cr);
 
+    } else if (strcmp(key_name, "Space") == 0) {
+        double icon_w = size * 0.25;
+        double icon_h = size * 0.1;
+
+        double start_x = x + (size * 0.35 - icon_w) / 2.0;
+        double bottom_y = y;
+
+        cairo_move_to(cr, start_x, bottom_y - icon_h);
+        cairo_line_to(cr, start_x, bottom_y);
+        cairo_line_to(cr, start_x + icon_w, bottom_y);
+        cairo_line_to(cr, start_x + icon_w, bottom_y - icon_h);
+        cairo_stroke(cr);
+
     } else if (strcmp(key_name, "Backspace") == 0 ||
                strcmp(key_name, "BackSpace") == 0) {
-        // ⌫ shape: left-pointing pentagon with X inside
         double cx = x + size * 0.55;
         double cy = y - size * 0.3;
-        double w = size * 0.35;   // half-width of box
-        double h = size * 0.22;   // half-height of box
-        double tip = size * 0.18; // depth of left arrow tip
+        double w = size * 0.35;
+        double h = size * 0.22;
+        double tip = size * 0.18;
 
-        // Pentagon outline (arrow pointing left)
-        cairo_move_to(cr, cx - w, cy);           // left tip
-        cairo_line_to(cr, cx - w + tip, cy - h); // top-left
-        cairo_line_to(cr, cx + w, cy - h);       // top-right
-        cairo_line_to(cr, cx + w, cy + h);       // bottom-right
-        cairo_line_to(cr, cx - w + tip, cy + h); // bottom-left
+        cairo_move_to(cr, cx - w, cy);
+        cairo_line_to(cr, cx - w + tip, cy - h);
+        cairo_line_to(cr, cx + w, cy - h);
+        cairo_line_to(cr, cx + w, cy + h);
+        cairo_line_to(cr, cx - w + tip, cy + h);
         cairo_close_path(cr);
         cairo_stroke(cr);
 
-        // X inside (centered in right portion of shape)
         double xc = cx + size * 0.1;
         double xs = h * 0.55;
         cairo_move_to(cr, xc - xs, cy - xs);
@@ -328,15 +338,16 @@ static int is_icon_key(const char *key) {
     if (strcmp(key, "Enter") == 0 || strcmp(key, "Left") == 0 ||
         strcmp(key, "Right") == 0 || strcmp(key, "Up") == 0 ||
         strcmp(key, "Down") == 0 || strcmp(key, "Tab") == 0 ||
-        strcmp(key, "Backspace") == 0 || strcmp(key, "BackSpace") == 0 ||
-        strcmp(key, "Del") == 0 || strcmp(key, "Delete") == 0 ||
-        strcmp(key, "Caps") == 0 || strcmp(key, "Home") == 0 ||
-        strcmp(key, "End") == 0 || strcmp(key, "PgUp") == 0 ||
-        strcmp(key, "PgDn") == 0 || strcmp(key, "Play") == 0 ||
-        strcmp(key, "Pause") == 0 || strcmp(key, "Prev") == 0 ||
-        strcmp(key, "Next") == 0 || strcmp(key, "Vol+") == 0 ||
-        strcmp(key, "Vol-") == 0 || strcmp(key, "Bri+") == 0 ||
-        strcmp(key, "Bri-") == 0 || strcmp(key, "Mute") == 0) {
+        strcmp(key, "Space") == 0 || strcmp(key, "Backspace") == 0 ||
+        strcmp(key, "BackSpace") == 0 || strcmp(key, "Del") == 0 ||
+        strcmp(key, "Delete") == 0 || strcmp(key, "Caps") == 0 ||
+        strcmp(key, "Home") == 0 || strcmp(key, "End") == 0 ||
+        strcmp(key, "PgUp") == 0 || strcmp(key, "PgDn") == 0 ||
+        strcmp(key, "Play") == 0 || strcmp(key, "Pause") == 0 ||
+        strcmp(key, "Prev") == 0 || strcmp(key, "Next") == 0 ||
+        strcmp(key, "Vol+") == 0 || strcmp(key, "Vol-") == 0 ||
+        strcmp(key, "Bri+") == 0 || strcmp(key, "Bri-") == 0 ||
+        strcmp(key, "Mute") == 0) {
         return 1;
     }
     if (key[0] == 'F' && strlen(key) >= 2 && strlen(key) <= 3) {
@@ -459,7 +470,11 @@ void redraw(struct client_state *state) {
         if (is_icon_key(base_key)) {
             seg_is_icon[i] = 1;
             strcpy(seg_keys[i], base_key);
-            w += icon_size;
+            if (strcmp(base_key, "Space") == 0) {
+                w += icon_size * 0.35;
+            } else {
+                w += icon_size;
+            }
         } else {
             seg_is_icon[i] = 0;
             // Measure base key at normal font size
@@ -559,7 +574,11 @@ void redraw(struct client_state *state) {
                 draw_icon(cr, base_key, current_x, y_pos, icon_size,
                           state->text_color);
             }
-            current_x += icon_size;
+            if (strcmp(base_key, "Space") == 0) {
+                current_x += icon_size * 0.35;
+            } else {
+                current_x += icon_size;
+            }
         } else {
             // Draw base key text at normal size
             cairo_set_font_size(cr, state->font_size);
