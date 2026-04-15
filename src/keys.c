@@ -5,6 +5,7 @@
 #include <libinput.h>
 #include "keys.h"
 #include "buffer.h"
+#include "window.h"
 
 static const char* get_key_symbol(xkb_keysym_t keysym) {
     switch (keysym) {
@@ -44,10 +45,6 @@ static const char* get_key_symbol(xkb_keysym_t keysym) {
         case XKB_KEY_XF86AudioNext:        return "Next";
         default: return NULL;
     }
-}
-
-static inline void show_window(struct client_state *state) {
-    state->window_visible = 1;
 }
 
 static int is_modifier(xkb_keysym_t key) {

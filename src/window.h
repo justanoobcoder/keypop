@@ -5,5 +5,6 @@
 
 void window_create(struct client_state *state);
 void hide_window(struct client_state *state);
+void show_window(struct client_state *state);
 
 #endif
