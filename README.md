@@ -1,7 +1,7 @@
 # Keypop (Wayland)
 A simple key display application for Wayland compositors. A fork of [keypop](https://github.com/yossefsabry/keypop).
 
-![b1](./public/b1.png)
+https://github.com/user-attachments/assets/1337b608-e949-4f60-886a-65614790432c
 
 ## Features
 - Shows typed keys on screen in real-time
