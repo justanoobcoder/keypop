@@ -128,13 +128,42 @@ static void process_key_action(struct client_state *state, uint32_t key) {
         clock_gettime(CLOCK_MONOTONIC, &state->last_key_time);
 
         if (keysym == XKB_KEY_BackSpace) {
-            // Reset repeat count tracking since buffer content changes
-            state->last_key[0] = '\0';
-            state->last_key_count = 0;
             if (state->ctrl_pressed) {
+                state->last_key[0] = '\0';
+                state->last_key_count = 0;
                 buf_delete_word(state);
             } else {
-                buf_append(state, " \xe2\x8c\xab"); // ⌫ as UTF-8
+                char combined_buf[64] = {0};
+                strncpy(combined_buf, "\xe2\x8c\xab",
+                        sizeof(combined_buf) - 1); // ⌫
+
+                if (strcmp(combined_buf, state->last_key) == 0) {
+                    state->last_key_count++;
+                    buf_pop_last_seg(state);
+
+                    char counted_buf[128];
+                    snprintf(counted_buf, sizeof(counted_buf), "%s\xc3\x97%d",
+                             combined_buf, state->last_key_count);
+                    buf_append(state, counted_buf);
+                } else {
+                    state->last_key_count = 1;
+                    strncpy(state->last_key, combined_buf,
+                            sizeof(state->last_key) - 1);
+                    state->last_key[sizeof(state->last_key) - 1] = '\0';
+
+                    if (state->seg_count > 0) {
+                        int last_len = state->seg_lengths[state->seg_count - 1];
+                        int this_len = strlen(combined_buf);
+                        int prev_is_special =
+                            (last_len > 1 &&
+                             state->display_buf[state->display_len - 1] != ' ');
+                        int this_is_special =
+                            (this_len > 1 && combined_buf[0] != ' ');
+                        if (prev_is_special || this_is_special)
+                            buf_append(state, " ");
+                    }
+                    buf_append(state, combined_buf);
+                }
             }
         } else if (state->ctrl_pressed && keysym == XKB_KEY_w) {
             state->last_key[0] = '\0';
