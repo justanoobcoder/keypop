@@ -33,7 +33,11 @@ Install keypop:
   ...
 }:{
   home.packages = with pkgs; [
+    # if you want to install lastest commit on main branch
     inputs.keypop.packages.${pkgs.stdenv.hostPlatform.system}.default
+
+    # or if you want to install lastest stable release
+    inputs.keypop.packages.${pkgs.stdenv.hostPlatform.system}.stable
   ];
 }
 ```
