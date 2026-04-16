@@ -40,10 +40,6 @@ stdenv.mkDerivation rec {
                 ${wayland-protocols}/share/wayland-protocols
   '';
 
-  preBuild = ''
-    export GIT_COMMIT="${src.rev or "unknown"}"
-  '';
-
   buildPhase = ''
     make
   '';
