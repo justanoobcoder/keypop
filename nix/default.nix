@@ -15,8 +15,8 @@
   isStable ? false,
 }:
 stdenv.mkDerivation rec {
-  name = "keypop";
-  version = "2.0";
+  pname = "keypop";
+  version = "2.0.1";
 
   src =
     if isStable
@@ -25,7 +25,7 @@ stdenv.mkDerivation rec {
         owner = "justanoobcoder";
         repo = "keypop";
         rev = "v${version}";
-        hash = "sha256-V08IMfvrv0hZmqyr5N56712GPupvFAjqOpdJ1q/ZoGc=";
+        hash = "sha256-z5EOGy3FTMBn8HrVy9M5qwRc5fcZuQyiiphIGPX0/jI=";
       }
     else ../.;
 
