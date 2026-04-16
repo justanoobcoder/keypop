@@ -15,6 +15,7 @@
     packages = forAllSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
+      stable = pkgs.callPackage ./nix/default.nix {isStable = true;};
       keypop = pkgs.callPackage ./nix/default.nix {};
       default = self.packages.${system}.keypop;
     });
