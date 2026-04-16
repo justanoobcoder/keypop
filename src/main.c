@@ -51,9 +51,10 @@ static gboolean on_timer_tick(gpointer data) {
     if (state->window_visible) {
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-        if (time_diff_ms(&state->last_key_time, &now) > HIDE_TIMEOUT_MS) {
+        if (state->hide_timeout > 0 &&
+            time_diff_ms(&state->last_key_time, &now) > state->hide_timeout) {
             hide_window(state);
-            state->needs_redraw = 0; // hide_window commits, so no redraw needed
+            state->needs_redraw = 0;
         }
     }
 
@@ -71,7 +72,6 @@ static gboolean on_timer_tick(gpointer data) {
     return TRUE; // Continue calling
 }
 
-// Helper to parse hex color
 // Helper to parse hex color
 static void parse_color(const char *hex, double *rgba) {
     if (!hex)
@@ -131,6 +131,12 @@ static void load_config_file(struct client_state *state) {
             state->bg_color[3] =
                 g_key_file_get_double(keyfile, "settings", "opacity", NULL);
         }
+
+        if (g_key_file_has_key(keyfile, "settings", "hide_timeout", NULL)) {
+            int t = g_key_file_get_integer(keyfile, "settings", "hide_timeout",
+                                           NULL);
+            state->hide_timeout = t < 0 ? HIDE_TIMEOUT_MS : t;
+        }
     }
 
     g_free(config_path);
@@ -144,7 +150,10 @@ static void print_usage(const char *prog) {
     printf("  -c <color>   Set text color (e.g. #FFFFFF or FFFFFF)\n");
     printf("  -s <size>    Set font size (default: 65)\n");
     printf("  -g <WxH>     Set window size (default: 840x130)\n");
-    printf("  -o <opacity> Set background opacity (0.0 - 1.0)\n");
+    printf("  -o <opacity> Set background opacity (0.0 - 1.0, default: 0.6)\n");
+    printf("  -t <ms>      Set hide timeout in milliseconds (0 = never hide, "
+           "default: %d)\n",
+           HIDE_TIMEOUT_MS);
     printf("  -v           Get version info\n");
     printf("  -h           Show this help\n");
 }
@@ -158,6 +167,7 @@ int main(int argc, char *argv[]) {
     // Default config
     state.width = DEFAULT_WIDTH;
     state.height = DEFAULT_HEIGHT;
+    state.hide_timeout = HIDE_TIMEOUT_MS;
 
     state.bg_color[0] = 0.0;
     state.bg_color[1] = 0.0;
@@ -178,7 +188,7 @@ int main(int argc, char *argv[]) {
     load_config_file(&state);
 
     int opt;
-    while ((opt = getopt(argc, argv, "b:c:s:g:o:vh")) != -1) {
+    while ((opt = getopt(argc, argv, "b:c:s:g:o:t:vh")) != -1) {
         switch (opt) {
         case 'b':
             parse_color(optarg, state.bg_color);
@@ -205,6 +215,12 @@ int main(int argc, char *argv[]) {
             if (opacity > 1.0f)
                 opacity = 1.0f;
             state.bg_color[3] = opacity;
+            break;
+        }
+        case 't': {
+            int t = atoi(optarg);
+            if (t >= 0)
+                state.hide_timeout = t;
             break;
         }
         case 'v':

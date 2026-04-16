@@ -73,7 +73,9 @@ Options:
 - `-c <color>`: Text color hex (e.g. `#FFFFFF` or `FFFFFF`)
 - `-s <size>`: Font size (default 65)
 - `-g <WxH>`: Window geometry (default 840x130)
-- `-o <opacity>`: Background opacity (0.0 - 1.0)
+- `-o <opacity>`: Background opacity (0.0 - 1.0, default 0.6)
+- `-t <time>`: Window hide time in milliseconds (0 = never hide, default: 2000)
+- `-v`: Get version info
 - `-h`: Show help
 
 ## Configuration
@@ -85,6 +87,7 @@ foreground=#FFFFFF
 font_size=65
 geometry=840x130
 opacity=0.6
+hide_timeout=2000
 ```
 
 ## Exit

@@ -75,6 +75,7 @@ struct client_state {
     int font_size;
     int width;
     int height;
+    int hide_timeout;
 
     // Combo highlighting
     double current_combo_color[4];    // Color for current combo (if special)
