@@ -76,6 +76,16 @@ Options:
 - `-o <opacity>`: Background opacity (0.0 - 1.0)
 - `-h`: Show help
 
+## Configuration
+Keypop can be configured via config file. Create a file named `keypop.conf` in `$XDG_CONFIG_HOME/keypop/` and add the following:
+```
+[settings]
+background=#000000
+foreground=#FFFFFF
+font_size=65
+geometry=840x130
+opacity=0.6
+```
 
 ## Exit
 - Press `Ctrl+C` in terminal
