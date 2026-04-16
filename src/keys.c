@@ -107,6 +107,35 @@ static int is_modifier(xkb_keysym_t key) {
             key == XKB_KEY_Shift_L || key == XKB_KEY_Shift_R);
 }
 
+static void append_or_increment_key_segment(struct client_state *state,
+                                            const char *key_text) {
+    if (strcmp(key_text, state->last_key) == 0) {
+        state->last_key_count++;
+        buf_pop_last_seg(state);
+
+        char counted_buf[128];
+        snprintf(counted_buf, sizeof(counted_buf), "%s\xc3\x97%d", key_text,
+                 state->last_key_count);
+        buf_append(state, counted_buf);
+        return;
+    }
+
+    state->last_key_count = 1;
+    strncpy(state->last_key, key_text, sizeof(state->last_key) - 1);
+    state->last_key[sizeof(state->last_key) - 1] = '\0';
+
+    if (state->seg_count > 0) {
+        int last_len = state->seg_lengths[state->seg_count - 1];
+        int this_len = strlen(key_text);
+        int prev_is_special =
+            (last_len > 1 && state->display_buf[state->display_len - 1] != ' ');
+        int this_is_special = (this_len > 1 && key_text[0] != ' ');
+        if (prev_is_special || this_is_special)
+            buf_append(state, " ");
+    }
+    buf_append(state, key_text);
+}
+
 static void process_key_action(struct client_state *state, uint32_t key) {
     uint32_t xkb_keycode = key + 8;
     xkb_state_update_key(state->xkb_state, xkb_keycode, XKB_KEY_DOWN);
@@ -133,37 +162,8 @@ static void process_key_action(struct client_state *state, uint32_t key) {
                 state->last_key_count = 0;
                 buf_delete_word(state);
             } else {
-                char combined_buf[64] = {0};
-                strncpy(combined_buf, "\xe2\x8c\xab",
-                        sizeof(combined_buf) - 1); // ⌫
-
-                if (strcmp(combined_buf, state->last_key) == 0) {
-                    state->last_key_count++;
-                    buf_pop_last_seg(state);
-
-                    char counted_buf[128];
-                    snprintf(counted_buf, sizeof(counted_buf), "%s\xc3\x97%d",
-                             combined_buf, state->last_key_count);
-                    buf_append(state, counted_buf);
-                } else {
-                    state->last_key_count = 1;
-                    strncpy(state->last_key, combined_buf,
-                            sizeof(state->last_key) - 1);
-                    state->last_key[sizeof(state->last_key) - 1] = '\0';
-
-                    if (state->seg_count > 0) {
-                        int last_len = state->seg_lengths[state->seg_count - 1];
-                        int this_len = strlen(combined_buf);
-                        int prev_is_special =
-                            (last_len > 1 &&
-                             state->display_buf[state->display_len - 1] != ' ');
-                        int this_is_special =
-                            (this_len > 1 && combined_buf[0] != ' ');
-                        if (prev_is_special || this_is_special)
-                            buf_append(state, " ");
-                    }
-                    buf_append(state, combined_buf);
-                }
+                const char *symbol = "\xe2\x8c\xab"; // ⌫ symbol
+                append_or_increment_key_segment(state, symbol);
             }
         } else if (state->ctrl_pressed && keysym == XKB_KEY_w) {
             state->last_key[0] = '\0';
@@ -232,43 +232,7 @@ static void process_key_action(struct client_state *state, uint32_t key) {
                     state->use_combo_color = 1;
                 }
 
-                // --- Key repeat count logic ---
-                if (strcmp(combined_buf, state->last_key) == 0) {
-                    // Same key again: increment count, pop last segment,
-                    // re-append with count
-                    state->last_key_count++;
-                    buf_pop_last_seg(state);
-
-                    // Also pop the preceding space separator if it was added
-                    // (only when count goes from 1→2, the space was added
-                    // before the first append) We don't pop the space; it
-                    // stays. The new segment replaces only the key seg.
-
-                    char counted_buf[128];
-                    // Use × (UTF-8: 0xC3 0x97) as multiplier symbol
-                    snprintf(counted_buf, sizeof(counted_buf), "%s\xc3\x97%d",
-                             combined_buf, state->last_key_count);
-                    buf_append(state, counted_buf);
-                } else {
-                    // New key: add space separator if needed, then append fresh
-                    state->last_key_count = 1;
-                    strncpy(state->last_key, combined_buf,
-                            sizeof(state->last_key) - 1);
-                    state->last_key[sizeof(state->last_key) - 1] = '\0';
-
-                    if (state->seg_count > 0) {
-                        int last_len = state->seg_lengths[state->seg_count - 1];
-                        int this_len = strlen(combined_buf);
-                        int prev_is_special =
-                            (last_len > 1 &&
-                             state->display_buf[state->display_len - 1] != ' ');
-                        int this_is_special =
-                            (this_len > 1 && combined_buf[0] != ' ');
-                        if (prev_is_special || this_is_special)
-                            buf_append(state, " ");
-                    }
-                    buf_append(state, combined_buf);
-                }
+                append_or_increment_key_segment(state, combined_buf);
             }
         }
         state->needs_redraw = 1;
