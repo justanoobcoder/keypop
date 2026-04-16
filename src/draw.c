@@ -3,7 +3,6 @@
 #include "draw.h"
 #include "shm.h"
 #include <cairo.h>
-#include <math.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -128,30 +127,6 @@ static void draw_icon(cairo_t *cr, const char *key_name, double x, double y,
         cairo_line_to(cr, start_x, bottom_y);
         cairo_line_to(cr, start_x + icon_w, bottom_y);
         cairo_line_to(cr, start_x + icon_w, bottom_y - icon_h);
-        cairo_stroke(cr);
-
-    } else if (strcmp(key_name, "Backspace") == 0 ||
-               strcmp(key_name, "BackSpace") == 0) {
-        double cx = x + size * 0.55;
-        double cy = y - size * 0.3;
-        double w = size * 0.35;
-        double h = size * 0.22;
-        double tip = size * 0.18;
-
-        cairo_move_to(cr, cx - w, cy);
-        cairo_line_to(cr, cx - w + tip, cy - h);
-        cairo_line_to(cr, cx + w, cy - h);
-        cairo_line_to(cr, cx + w, cy + h);
-        cairo_line_to(cr, cx - w + tip, cy + h);
-        cairo_close_path(cr);
-        cairo_stroke(cr);
-
-        double xc = cx + size * 0.1;
-        double xs = h * 0.55;
-        cairo_move_to(cr, xc - xs, cy - xs);
-        cairo_line_to(cr, xc + xs, cy + xs);
-        cairo_move_to(cr, xc + xs, cy - xs);
-        cairo_line_to(cr, xc - xs, cy + xs);
         cairo_stroke(cr);
 
     } else if (strcmp(key_name, "Del") == 0 ||
@@ -350,8 +325,7 @@ static int is_icon_key(const char *key) {
     if (strcmp(key, "Enter") == 0 || strcmp(key, "Left") == 0 ||
         strcmp(key, "Right") == 0 || strcmp(key, "Up") == 0 ||
         strcmp(key, "Down") == 0 || strcmp(key, "Tab") == 0 ||
-        strcmp(key, "Space") == 0 || strcmp(key, "Backspace") == 0 ||
-        strcmp(key, "BackSpace") == 0 || strcmp(key, "Del") == 0 ||
+        strcmp(key, "Space") == 0 || strcmp(key, "Del") == 0 ||
         strcmp(key, "Delete") == 0 || strcmp(key, "Caps") == 0 ||
         strcmp(key, "Home") == 0 || strcmp(key, "End") == 0 ||
         strcmp(key, "PgUp") == 0 || strcmp(key, "PgDn") == 0 ||
