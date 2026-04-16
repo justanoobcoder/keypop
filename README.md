@@ -1,5 +1,5 @@
 # Keypop (Wayland)
-A simple key display application for Wayland compositors.
+A simple key display application for Wayland compositors. A fork of [keypop](https://github.com/yossefsabry/keypop).
 
 ![b1](./public/b1.png)
 
@@ -38,6 +38,24 @@ Install keypop:
 }
 ```
 
+Add user to `input` group:
+```nix
+users.users.your_username = {
+  extraGroups = [
+    "wheel"
+    "input"
+  ];
+};
+```
+
+## Dependencies
+- wayland-client
+- wayland-protocols
+- cairo
+- libinput
+- libudev
+- xkbcommon
+
 ## Build
 ```bash
 make
@@ -64,8 +82,8 @@ Then run:
 
 Or run with custom options:
 ```bash
-# E.g., Blue background, Red text, Size 80, 1000x200 window, 80% opacity
-./keypop -b "#0000FF" -c "#FF0000" -s 80 -g 1000x200 -o 0.8
+# E.g., Blue background, Red text, Size 80, 1000x200 window, 80% opacity, hide after 5 seconds
+./keypop -b "#0000FF" -c "#FF0000" -s 80 -g 1000x200 -o 0.8 -t 5000
 ```
 
 Options:
@@ -93,12 +111,3 @@ hide_timeout=2000
 ## Exit
 - Press `Ctrl+C` in terminal
 - Or kill the process: `pkill keypop`
-- Or close via Hyprland: `hyprctl dispatch killactive` with window focused
-
-## Dependencies
-- wayland-client
-- wayland-protocols
-- cairo
-- libinput
-- libudev
-- xkbcommon
