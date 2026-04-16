@@ -11,12 +11,23 @@
   libxkbcommon,
   gtk3,
   libappindicator-gtk3,
+  fetchFromGitHub,
+  isStable ? false,
 }:
 stdenv.mkDerivation rec {
   name = "keypop";
   version = "2.0";
 
-  src = ../.;
+  src =
+    if isStable
+    then
+      fetchFromGitHub {
+        owner = "justanoobcoder";
+        repo = "keypop";
+        rev = "v${version}";
+        hash = "sha256-V08IMfvrv0hZmqyr5N56712GPupvFAjqOpdJ1q/ZoGc=";
+      }
+    else ../.;
 
   nativeBuildInputs = [
     pkg-config
@@ -36,7 +47,7 @@ stdenv.mkDerivation rec {
 
   patchPhase = ''
     substituteInPlace Makefile \
-      --replace /usr/share/wayland-protocols \
+      --replace-fail /usr/share/wayland-protocols \
                 ${wayland-protocols}/share/wayland-protocols
   '';
 
